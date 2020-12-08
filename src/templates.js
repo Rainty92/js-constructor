@@ -1,37 +1,37 @@
-export function title (block) {
-	return `
-		<div class="row">
-			<div class="col-sm">
-				<h1>${block.value}</h1>
-			</div>
-		</div>
-	`
+import {row, col} from './utils'
+
+
+function title (block) {
+	
+	const {tag = 'h1', styles} = block.options // === const tag = block.options.tag ?? 'h1' , const styles = block.options.styles//
+
+	return row(col(`<${tag}>${block.value}</${tag}>`), styles)
+	
 }
 
-export function text (block) {
-	return `
-	<div class="row">
-		<div class="col-sm">
-			<h1>${block.value}</h1>
-		</div>
-	</div>
+function text (block) {
 
-	`
+	return row(col(`<p>${block.value}</p>`))
+	
 }
 
-export function columns(block) {
-	const html = block.value.map(item=> `<div class="col-sm">${item}</div>`)
-	return `
-		<div class="row">
-			${html.join('')}
-		</div>
-	`
+function columns (block) {
+	const html = block.value.map(col).join('')//col === item=> col(item)//
+
+	return row(html)
+		
 }
 
-export function image(block) {
-	return `
-		<div class="row">
-			<img src="${block.value}" />
-		</div>
-	`
+function image (block) {
+
+	return row(`<img src="${block.value}" />`)
+	
+}
+
+export const templates = {
+	title,
+	text,
+	image,
+	columns
+
 }

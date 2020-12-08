@@ -117,16 +117,27 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"model.js":[function(require,module,exports) {
+})({"assets/image_for_constructor.png":[function(require,module,exports) {
+module.exports = "/image_for_constructor.13fb645c.png";
+},{}],"model.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.model = void 0;
+
+var _image_for_constructor = _interopRequireDefault(require("./assets/image_for_constructor.png"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var model = [{
   type: 'title',
-  value: 'Hello World from JS'
+  value: 'Конструктор сайтов на чистом JS',
+  options: {
+    tag: 'h2',
+    styles: "background: linear-gradient(to right, #ff0099, #493240); color: #fff; text-align: center; padding: 1.5rem;user-select: none;"
+  }
 }, {
   type: 'text',
   value: 'random text'
@@ -135,39 +146,68 @@ var model = [{
   value: ['111111111', '222222222', '333333333']
 }, {
   type: 'image',
-  value: '/assets/image_for_constructor.png'
+  value: _image_for_constructor.default
 }];
 exports.model = model;
+},{"./assets/image_for_constructor.png":"assets/image_for_constructor.png"}],"utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.row = row;
+exports.col = col;
+
+//автоматизируем создание функций//
+function row(content) {
+  var styles = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+  return "<div class=\"row\" style=\"".concat(styles, "\">").concat(content, "</div>");
+}
+
+function col(content) {
+  return "<div class=\"col-sm\">".concat(content, "</div>");
+}
 },{}],"templates.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.title = title;
-exports.text = text;
-exports.columns = columns;
-exports.image = image;
+exports.templates = void 0;
+
+var _utils = require("./utils");
 
 function title(block) {
-  return "\n\t\t<div class=\"row\">\n\t\t\t<div class=\"col-sm\">\n\t\t\t\t<h1>".concat(block.value, "</h1>\n\t\t\t</div>\n\t\t</div>\n\t");
+  var _block$options = block.options,
+      _block$options$tag = _block$options.tag,
+      tag = _block$options$tag === void 0 ? 'h1' : _block$options$tag,
+      styles = _block$options.styles; // === const tag = block.options.tag ?? 'h1' , const styles = block.options.styles//
+
+  return (0, _utils.row)((0, _utils.col)("<".concat(tag, ">").concat(block.value, "</").concat(tag, ">")), styles);
 }
 
 function text(block) {
-  return "\n\t<div class=\"row\">\n\t\t<div class=\"col-sm\">\n\t\t\t<h1>".concat(block.value, "</h1>\n\t\t</div>\n\t</div>\n\n\t");
+  return (0, _utils.row)((0, _utils.col)("<p>".concat(block.value, "</p>")));
 }
 
 function columns(block) {
-  var html = block.value.map(function (item) {
-    return "<div class=\"col-sm\">".concat(item, "</div>");
-  });
-  return "\n\t\t<div class=\"row\">\n\t\t\t".concat(html.join(''), "\n\t\t</div>\n\t");
+  var html = block.value.map(_utils.col).join(''); //col === item=> col(item)//
+
+  return (0, _utils.row)(html);
 }
 
 function image(block) {
-  return "\n\t\t<div class=\"row\">\n\t\t\t<img src=\"".concat(block.value, "\" />\n\t\t</div>\n\t");
+  return (0, _utils.row)("<img src=\"".concat(block.value, "\" />"));
 }
-},{}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+
+var templates = {
+  title: title,
+  text: text,
+  image: image,
+  columns: columns
+};
+exports.templates = templates;
+},{"./utils":"utils.js"}],"../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -248,22 +288,15 @@ var _templates = require("./templates");
 
 require("./styles/main.css");
 
-var $site = document.querySelector('#site');
+var $site = document.querySelector('#site'); //перебираем model.js//
 
 _model.model.forEach(function (block) {
-  var html = '';
+  //перебираем ключи и добавляем в templates(ключи берем из model + функции из templates)//
+  var toHTML = _templates.templates[block.type];
 
-  if (block.type === 'title') {
-    html = (0, _templates.title)(block);
-  } else if (block.type === 'text') {
-    html = (0, _templates.text)(block);
-  } else if (block.type === 'columns') {
-    html = (0, _templates.columns)(block);
-  } else if (block.type === 'image') {
-    html = (0, _templates.image)(block);
+  if (toHTML) {
+    $site.insertAdjacentHTML('beforeend', toHTML(block)); //проверяем что в HTML что то есть//
   }
-
-  $site.insertAdjacentHTML('beforeend', html);
 });
 },{"./model":"model.js","./templates":"templates.js","./styles/main.css":"styles/main.css"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -293,7 +326,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60685" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54984" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
